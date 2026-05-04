@@ -43,22 +43,6 @@ const Access = () => {
         />
       </View>
       </View>
-
-      <View className="w-full px-10">
-                <FlatList
-          data={options}
-          keyExtractor={(item) => item.id}
-          renderItem={({ item }) => (
-            <Pressable
-              className="w-full flex justify-center items-center border rounded-3xl h-12 my-2"
-              onPress={() => router.push(item.screen)}
-            >
-              <Text className="text-lg text-white">{item.title}</Text>
-            </Pressable>
-          )}
-        />
-
-      </View>
     </SafeAreaView>
   );
 };
