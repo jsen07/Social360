@@ -8,7 +8,14 @@ module.exports = {
   ],
   presets: [require("nativewind/preset")],
   theme: {
-    extend: {},
+    extend: {
+      fontFamily: {
+        plex: ["IBMPlexSans_100Thin"],
+        plexMedium: ["IBMPlexSans_200ExtraLight"],
+        plexSemiBold: ["IBMPlexSans_300Light"],
+        plexBold: ["IBMPlexSans_400Regular"],
+      },
+    },
   },
   plugins: [],
 };

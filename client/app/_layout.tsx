@@ -1,46 +1,38 @@
-import { Stack, Redirect } from "expo-router";
+import { Stack } from "expo-router";
 import useAuth from "../hooks/useAuth";
-import { useEffect, useState } from "react";
-import { StatusBar } from "expo-status-bar";
 import "../global.css";
 import { Amplify } from "aws-amplify";
-import { Hub } from "aws-amplify/utils";
 import outputs from "../amplify_outputs.json";
-import type { AuthUser } from "aws-amplify/auth";
-import { getCurrentUser } from "aws-amplify/auth";
+
+import {
+  useFonts,
+  IBMPlexSans_100Thin,
+  IBMPlexSans_200ExtraLight,
+  IBMPlexSans_300Light,
+  IBMPlexSans_400Regular,
+  IBMPlexSans_500Medium,
+  IBMPlexSans_600SemiBold,
+  IBMPlexSans_700Bold,
+} from "@expo-google-fonts/ibm-plex-sans";
 
 Amplify.configure(outputs);
 export default function Layout() {
   const { user, loading, isLoggedIn } = useAuth();
-  // const [user, setUser] = useState<AuthUser | null>(null);
-  // const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
-  // const [loading, setLoading] = useState<boolean>(true);
 
-  // useEffect(() => {
-  //   const fetchUser = async () => {
-  //     try {
-  //       const currentUser = await getCurrentUser();
-  //       setUser(currentUser);
-  //       setIsLoggedIn(true);
-  //     } catch {
-  //       setUser(null);
-  //       setIsLoggedIn(false);
-  //     } finally {
-  //       setLoading(false);
-  //     }
-  //   };
+  const [fontsLoaded] = useFonts({
+    IBMPlexSans_100Thin,
+    IBMPlexSans_200ExtraLight,
+    IBMPlexSans_300Light,
+    IBMPlexSans_400Regular,
+    IBMPlexSans_500Medium,
+    IBMPlexSans_600SemiBold,
+    IBMPlexSans_700Bold,
+  });
 
-  //   fetchUser();
-  // }, []);
+  if (!fontsLoaded || loading) return null;
 
-  // if (loading) return null;
-
-  // if (!user) {
-  //   return <Redirect href="/(auth)/access" />;
-  // }
   return (
     <>
-      <StatusBar style="dark" />
       <Stack
         screenOptions={{ headerShown: false, animation: "fade_from_bottom" }}
       >
