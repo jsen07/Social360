@@ -2,28 +2,68 @@ import React, { useState, useEffect } from "react";
 import { getCurrentUser } from "aws-amplify/auth";
 import type { AuthUser } from "aws-amplify/auth";
 import { Hub } from "aws-amplify/utils";
+import { useLazyQuery } from "@apollo/client";
+import { GET_USER_PROFILE } from "../utils/queries";
+import { router } from "expo-router";
 
 interface UseAuthResult {
-  user: AuthUser | null;
+  authUser: AuthUser | null;
+  profile: any | null;
+  hasCompletedOnboarding: boolean;
   loading: boolean;
   isLoggedIn: boolean;
+  refreshProfile: () => Promise<void>;
+  isDBConnected: boolean;
 }
 export default function useAuth(): UseAuthResult {
-  const [user, setUser] = useState<AuthUser | null>(null);
+  const [getUserProfile] = useLazyQuery(GET_USER_PROFILE, {
+    fetchPolicy: "network-only",
+  });
+  const [authUser, setAuthUser] = useState<AuthUser | null>(null);
+  const [profile, setProfile] = useState<any | null>(null);
+  const [hasCompletedOnboarding, setHasCompletedOnboarding] =
+    useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(true);
   const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
+  const [isDBConnected, setIsDBConnected] = useState<boolean>(false);
+
+  const refreshProfile = async () => {
+    const currentAuthUser = await getCurrentUser();
+    setAuthUser(currentAuthUser);
+    setIsLoggedIn(true);
+    try {
+      const { data, error } = await getUserProfile({
+        variables: {
+          cognitoSub: currentAuthUser.userId,
+        },
+      });
+      const profile = data?.getUserProfile ?? null;
+      const company = profile?.companies?.[0];
+      setProfile(profile);
+      setHasCompletedOnboarding(company?.hasCompletedOnboarding === true);
+      setIsDBConnected(true);
+
+      console.log(data);
+      if (error && !data) setIsDBConnected(false);
+    } catch (error: any) {
+      setProfile(null);
+      setHasCompletedOnboarding(false);
+      setIsDBConnected(false);
+    }
+  };
 
   //check for initial user
   useEffect(() => {
     const initializeUser = async () => {
       try {
-        const user = await getCurrentUser();
-        setUser(user);
-        setIsLoggedIn(true);
-        console.log("Logged in user:", user);
+        setLoading(true);
+        await refreshProfile();
       } catch (error: any) {
-        setUser(null);
+        setAuthUser(null);
+        setProfile(null);
+        setHasCompletedOnboarding(false);
         setIsLoggedIn(false);
+        setIsDBConnected(false);
       } finally {
         setLoading(false);
       }
@@ -38,8 +78,11 @@ export default function useAuth(): UseAuthResult {
           break;
         case "signedOut":
         case "signInWithRedirect_failure":
-          setUser(null);
+          setAuthUser(null);
+          setProfile(null);
+          setHasCompletedOnboarding(false);
           setIsLoggedIn(false);
+          setIsDBConnected(false);
           console.log("You have been signed out.");
           break;
       }
@@ -51,5 +94,13 @@ export default function useAuth(): UseAuthResult {
     };
   }, []);
 
-  return { user, loading, isLoggedIn };
+  return {
+    authUser,
+    profile,
+    hasCompletedOnboarding,
+    loading,
+    isLoggedIn,
+    refreshProfile,
+    isDBConnected,
+  };
 }

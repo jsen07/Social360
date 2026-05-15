@@ -2,12 +2,14 @@ import { View, Text, Pressable, TextInput } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import React, { useState } from "react";
 import { useRouter } from "expo-router";
-import { signIn } from "aws-amplify/auth";
+import { getCurrentUser, signIn } from "aws-amplify/auth";
+import { CREATE_USER } from "../../utils/mutations";
 import { ActivityIndicator } from "react-native";
 import Animated from "react-native-reanimated";
 import { usePressAnimation } from "@/animations/pressAnimation";
 import { ChevronLeft, Eye, EyeOff } from "lucide-react-native";
 import { Keyboard, TouchableWithoutFeedback } from "react-native";
+import { useMutation } from "@apollo/client";
 
 const signin = () => {
   const router = useRouter();
@@ -17,6 +19,7 @@ const signin = () => {
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string>("");
   const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
+  const [createUser] = useMutation(CREATE_USER);
 
   const signinAnimation = usePressAnimation();
   const backAnimation = usePressAnimation();
@@ -37,6 +40,16 @@ const signin = () => {
           authFlowType: "USER_PASSWORD_AUTH",
         },
       });
+
+      if (isSignedIn) {
+        const currentUser = await getCurrentUser();
+        await createUser({
+          variables: {
+            email,
+            cognitoSub: currentUser.userId,
+          },
+        });
+      }
 
       if (nextStep) {
         if (nextStep.signInStep === "CONFIRM_SIGN_UP") {
@@ -153,6 +166,17 @@ const signin = () => {
               </Pressable>
             </View>
           </View>
+          <View className="flex-row items-center w-full py-2">
+            <View className="flex-1">
+              {error ? (
+                <Text className="text-red-500 text-sm px-1">{error}</Text>
+              ) : null}
+            </View>
+
+            <Pressable>
+              <Text className="text-neutral-500 text-sm">Forgot password?</Text>
+            </Pressable>
+          </View>
 
           <AnimatedPressable
             onPressIn={signinAnimation.onPressIn}
@@ -160,7 +184,7 @@ const signin = () => {
             style={signinAnimation.animatedStyle}
             onPress={handleLogin}
             className={`
-            h-14 rounded-2xl bg-white items-center justify-center mt-8 active:opacity-90
+            h-14 rounded-2xl bg-blue-400 items-center justify-center mt-8 active:opacity-90
             ${loading ? "opacity-70" : ""}`}
             disabled={loading}
           >
@@ -172,10 +196,6 @@ const signin = () => {
               </Text>
             )}
           </AnimatedPressable>
-
-          {error ? (
-            <Text className="text-red-500 text-sm mt-4">{error}</Text>
-          ) : null}
         </View>
 
         <View className="flex-row justify-center mt-8 self-base">

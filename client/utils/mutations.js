@@ -1,11 +1,14 @@
 import { gql } from "@apollo/client";
 
 export const CREATE_USER = gql`
-  mutation CreateUser($email: String!, $cognitoSub: String!) {
-    createUser(email: $email, cognitoSub: $cognitoSub) {
+  mutation CreateUser($email: String!) {
+    createUser(email: $email) {
       id
       email
-      cognitoSub
+      fullname
+      birthdate
+      gender
+      createdAt
     }
   }
 `;
@@ -16,20 +19,26 @@ export const INVITE_EMPLOYEE = gql`
   }
 `;
 
-export const CREATE_BUSINESS_ACCOUNT = gql`
-  mutation CreateBusinessAccount(
-    $email: String!
-    $cognitoSub: String!
+export const SAVE_ONBOARDING_DETAILS = gql`
+  mutation SaveOnboardingDetails(
     $fullname: String!
-    $comapanyName: String!
-    $role: String!
+    $companyRole: String!
+    $companyName: String!
+    $businessType: String!
+    $numberOfLocations: Int
+    $employeeCountRange: String!
   ) {
-    createBusinessAccount(
-      email: $email
-      cognitoSub: $cognitoSub
+    saveOnboardingDetails(
       fullname: $fullname
+      companyRole: $companyRole
       companyName: $companyName
-      role: $role
-    )
+      businessType: $businessType
+      numberOfLocations: $numberOfLocations
+      employeeCountRange: $employeeCountRange
+    ) {
+      id
+      name
+      hasCompletedOnboarding
+    }
   }
 `;

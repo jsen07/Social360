@@ -5,12 +5,6 @@ import { LinearGradient } from "expo-linear-gradient";
 import Animated from "react-native-reanimated";
 import { usePressAnimation } from "@/animations/pressAnimation";
 
-type Option = {
-  id: string;
-  title: string;
-  screen: "/signin" | "/signup";
-};
-
 const Access = () => {
   const router = useRouter();
   const AnimatedPressable = Animated.createAnimatedComponent(Pressable);

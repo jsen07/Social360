@@ -168,6 +168,11 @@ const signup = () => {
               </Pressable>
             </View>
           </View>
+
+          {error ? (
+            <Text className="text-red-500 text-sm mt-4 px-1">{error}</Text>
+          ) : null}
+
           <AnimatedPressable
             onPressIn={signupAnimation.onPressIn}
             onPressOut={signupAnimation.onPressOut}
@@ -193,10 +198,6 @@ const signup = () => {
               </Text>
             )}
           </AnimatedPressable>
-
-          {error ? (
-            <Text className="text-red-500 text-sm mt-4">{error}</Text>
-          ) : null}
         </View>
         {/* Footer */}
         <View className="flex-row justify-center mt-8 self-base">
