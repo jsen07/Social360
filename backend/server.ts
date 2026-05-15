@@ -8,6 +8,7 @@ import { sql } from "drizzle-orm";
 import { typeDefs, resolvers } from "./src/schemas/index";
 import { db } from "./src/db/index.js";
 
+import { verifyJWT } from "./JWT/cognito-verify";
 const app = express();
 
 app.use(cors());
@@ -23,17 +24,28 @@ const startServer = async () => {
 
   app.use(
     "/graphql",
+    cors(),
+    express.json(),
     expressMiddleware(server, {
-      context: async () => ({
-        db,
-      }),
+      context: async ({ req }) => {
+        const authHeader = req.headers.authorization;
+
+        const token = authHeader?.replace("Bearer ", "");
+
+        const authUser = token ? await verifyJWT(token) : null;
+
+        return {
+          db,
+          authUser,
+        };
+      },
     }),
   );
 
   const PORT = 4000;
 
   app.listen(PORT, () => {
-    console.log(`🚀 Server running on http://192.168.1.151:${PORT}/graphql`);
+    console.log(`Server running on http://192.168.1.151:${PORT}/graphql`);
   });
 };
 

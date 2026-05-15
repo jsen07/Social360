@@ -6,6 +6,7 @@ import {
   date,
   integer,
   unique,
+  boolean,
 } from "drizzle-orm/pg-core";
 
 export const users = pgTable("users", {
@@ -21,6 +22,13 @@ export const users = pgTable("users", {
 export const companies = pgTable("companies", {
   id: serial("id").primaryKey(),
   name: text("name").notNull(),
+  businessType: text("business_type"),
+  numberOfLocations: integer("number_of_locations"),
+  employeeCountRange: text("employee_count_range"),
+  hasCompletedOnboarding: boolean("has_completed_onboarding")
+    .notNull()
+    .default(false),
+  // onboardingStep: integer("onboarding_step").notNull().default(0),
   createdAt: timestamp("created_at").defaultNow(),
 });
 

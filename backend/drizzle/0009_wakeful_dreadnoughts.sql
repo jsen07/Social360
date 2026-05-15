@@ -1,0 +1,1 @@
+ALTER TABLE "companies" RENAME COLUMN "number_of_employees" TO "employee_count_range";

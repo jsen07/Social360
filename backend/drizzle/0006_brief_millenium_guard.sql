@@ -1,0 +1,1 @@
+ALTER TABLE "companies" ALTER COLUMN "business_type" SET NOT NULL;

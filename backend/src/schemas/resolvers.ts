@@ -9,30 +9,80 @@ export const resolvers = {
     users: async (_: unknown, __: unknown, { db }: any) => {
       return await db.select().from(users);
     },
+
+    getUserProfile: async (_: unknown, __: unknown, { db, authUser }: any) => {
+      if (!authUser) {
+        throw new Error("Unauthorized");
+      }
+
+      const [result] = await db
+        .select({
+          userId: users.id,
+          email: users.email,
+          cognitoSub: users.cognitoSub,
+          fullname: users.fullname,
+          birthdate: users.birthdate,
+          gender: users.gender,
+          createdAt: users.createdAt,
+
+          companyId: companies.id,
+          companyName: companies.name,
+          hasCompletedOnboarding: companies.hasCompletedOnboarding,
+
+          role: companyUsers.role,
+        })
+        .from(users)
+        .leftJoin(companyUsers, eq(users.id, companyUsers.userId))
+        .leftJoin(companies, eq(companyUsers.companyId, companies.id))
+        .where(eq(users.cognitoSub, authUser.sub));
+
+      if (!result) return null;
+
+      // Payload
+      return {
+        id: result.userId,
+        email: result.email,
+        fullname: result.fullname,
+        birthdate: result.birthdate,
+        gender: result.gender,
+        createdAt: result.createdAt,
+
+        companies: result.companyId
+          ? [
+              {
+                id: result.companyId,
+                name: result.companyName,
+                hasCompletedOnboarding: result.hasCompletedOnboarding,
+                role: result.role,
+              },
+            ]
+          : [],
+      };
+    },
   },
 
   Mutation: {
     createUser: async (
       _: unknown,
-      { email, cognitoSub }: { email: string; cognitoSub: string },
-      { db }: any,
+      { email }: { email: string },
+      { db, authUser }: any,
     ) => {
-      const inserted = await db
+      if (!authUser) {
+        throw new Error("Unauthorized");
+      }
+
+      const [user] = await db
         .insert(users)
-        .values({ email, cognitoSub })
-        .onConflictDoNothing({
+        .values({ email, cognitoSub: authUser.sub })
+        .onConflictDoUpdate({
           target: users.cognitoSub,
+          set: {
+            email,
+          },
         })
         .returning();
 
-      if (inserted.length > 0) return inserted[0];
-
-      const existing = await db
-        .select()
-        .from(users)
-        .where(eq(users.cognitoSub, cognitoSub));
-
-      return existing[0];
+      return user;
     },
 
     inviteEmployee: async (
@@ -78,53 +128,64 @@ export const resolvers = {
       await sendInviteEmail({
         to: email,
         inviteUrl,
-        companyName: "Social360",
+        companyName: "Sixo",
       });
 
       return true;
     },
 
-    createBusinessAccount: async (
+    saveOnboardingDetails: async (
       _: unknown,
       {
-        email,
-        cognitoSub,
         fullname,
+        companyRole,
         companyName,
-        role,
+        businessType,
+        numberOfLocations,
+        employeeCountRange,
       }: {
-        email: string;
-        cognitoSub: string;
         fullname: string;
+        companyRole: string;
         companyName: string;
-        role: "Owner" | "Manager";
+        businessType: string;
+        numberOfLocations?: number | null;
+        employeeCountRange: string;
       },
-      { db }: any,
+      { db, authUser }: any,
     ) => {
+      console.log("Resolver authUser:", authUser?.sub);
+      if (!authUser) {
+        throw new Error("Unauthorized");
+      }
+
       const [user] = await db
-        .insert(users)
-        .values({ email, cognitoSub, fullname })
-        .onConflictDoNothing({
-          target: users.cognitoSub,
-        })
+        .update(users)
+        .set({ fullname })
+        .where(eq(users.cognitoSub, authUser.sub))
         .returning();
+
+      if (!user) {
+        throw new Error("User not found");
+      }
 
       const [company] = await db
         .insert(companies)
-        .values({ name: companyName })
+        .values({
+          name: companyName,
+          businessType: businessType,
+          numberOfLocations: numberOfLocations ?? null,
+          employeeCountRange: employeeCountRange,
+          hasCompletedOnboarding: true,
+        })
         .returning();
 
       await db.insert(companyUsers).values({
         userId: user.id,
         companyId: company.id,
-        role,
+        role: companyRole,
       });
 
-      return {
-        user,
-        company,
-        role,
-      };
+      return company;
     },
   },
 };
