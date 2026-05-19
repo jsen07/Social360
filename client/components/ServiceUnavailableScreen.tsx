@@ -1,18 +1,37 @@
 import { View, Text, Pressable } from "react-native";
 import { WifiOff } from "lucide-react-native";
+import { useAuth } from "@/hooks/useAuth";
+import { router, useRouter } from "expo-router";
+import { useEffect, useState } from "react";
 
-type Props = {
-  onRetry?: () => void;
-};
+const ServiceUnavailableScreen = () => {
+  const router = useRouter();
+  const { refreshProfile, loading } = useAuth();
+  const [timer, setTimer] = useState<number>(5);
+  const [reconnecting, setReconnecting] = useState<boolean>(false);
 
-const ServiceUnavailableScreen = ({ onRetry }: Props) => {
+  const reconnect = async () => {
+    setReconnecting(true);
+    setInterval(() => {
+      setTimeout(() => {
+        setTimer((prev) => prev - 1);
+      }, 1000);
+    }, 1000);
+  };
+
+  const refetch = async () => {
+    const data = await refreshProfile();
+  };
+  useEffect(() => {
+    if (timer === 0) {
+      router.replace("/(app)");
+    }
+  }, [timer]);
   return (
     <View className="flex-1 bg-neutral-900 px-6 items-center justify-center">
-      {/* Ambient background */}
       <View className="absolute top-[-120] left-[-80] w-[300] h-[300] rounded-full bg-blue-400/10" />
       <View className="absolute bottom-[-140] right-[-100] w-[280] h-[280] rounded-full bg-indigo-400/10" />
 
-      {/* Icon */}
       <View className="w-20 h-20 rounded-3xl bg-neutral-800 border border-neutral-700 items-center justify-center mb-8">
         <WifiOff size={34} color="#d4d4d4" />
       </View>
@@ -22,14 +41,18 @@ const ServiceUnavailableScreen = ({ onRetry }: Props) => {
         We couldn’t load {"\n"}your workspace.
       </Text>
 
-      {/* Subheading */}
       <Text className="text-neutral-400 text-base text-center leading-7 mt-5 max-w-[320]">
         Our services are temporarily unavailable. Please try again in a moment.
       </Text>
 
-      {/* Retry button */}
+      {reconnecting && (
+        <Text className="text-neutral-400 text-base text-center leading-7 mt-5 max-w-[320]">
+          Attempting to reconnect in {timer}..
+        </Text>
+      )}
+
       <Pressable
-        onPress={onRetry}
+        onPress={() => reconnect()}
         className="mt-10 h-14 px-8 rounded-2xl bg-white items-center justify-center active:opacity-80"
       >
         <Text className="text-neutral-950 text-base font-plexBold">

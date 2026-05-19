@@ -24,60 +24,94 @@ const FinishSetup = () => {
   );
   const teamSize = useSelector((state: RootState) => state.onboarding.teamSize);
 
-  const results = () => {
-    console.log(
-      "fullname:",
-      fullname,
-      "userRole:",
-      userRole,
-      "businessName:",
-      businessName,
-      "businessType:",
-      businessType,
-      "locations:",
-      locations,
-      "teamSize:",
-      teamSize,
-    );
-  };
   return (
     <View className="flex-1 bg-neutral-900 px-5">
-      <View className="flex-1">
-        {/* Header */}
-        <View className="flex-row items-center justify-between">
-          <AnimatedPressable
-            onPressIn={backAnimation.onPressIn}
-            onPressOut={backAnimation.onPressOut}
-            style={backAnimation.animatedStyle}
-            onPress={() => router.back()}
-            className="flex-row items-center active:opacity-70"
-          >
-            <ArrowLeft size={18} color="#a3a3a3" />
-            <Text className="text-neutral-400 font-plexMedium ml-1 text-base">
-              Previous
+      {/* Content */}
+      <View className="gap-4 flex-1">
+        <Text className="text-white text-4xl font-plexBold leading-tight mt-4">
+          You're almost ready.
+        </Text>
+        <Text className="text-neutral-400 text-sm leading-7">
+          We'll create your workspace and prepare your team setup.
+        </Text>
+        <View className="bg-neutral-800 border border-neutral-700 rounded-3xl p-5 gap-5 mt-10">
+          {/* Role */}
+          <View className="flex-row items-center justify-between">
+            <Text className="text-neutral-400 text-sm font-plexMedium">
+              Your Role
             </Text>
-          </AnimatedPressable>
-          <Text className=" self-end text-neutral-400 text-sm font-plexMedium mb-4 mt-4">
-            Step 4 of 4
-          </Text>
+
+            <Text className="text-white text-base font-plexSemiBold">
+              {userRole}
+            </Text>
+          </View>
+          <View className="h-[1px] bg-neutral-700/60" />
+          {/* Business Name */}
+          <View className="flex-row items-center justify-between">
+            <Text className="text-neutral-400 text-sm font-plexMedium">
+              Business Name
+            </Text>
+
+            <Text className="text-white text-base font-plexSemiBold text-right max-w-[180]">
+              {businessName}
+            </Text>
+          </View>
+          <View className="h-[1px] bg-neutral-700/60" />
+
+          {/* Business Type */}
+          <View className="flex-row items-center justify-between">
+            <Text className="text-neutral-400 text-sm font-plexMedium">
+              Business Type
+            </Text>
+
+            <Text className="text-white text-base font-plexSemiBold">
+              {businessType}
+            </Text>
+          </View>
+          <View className="h-[1px] bg-neutral-700/60" />
+
+          {/* Locations */}
+          {locations && (
+            <>
+              <View className="flex-row items-center justify-between">
+                <Text className="text-neutral-400 text-sm font-plexMedium">
+                  Locations
+                </Text>
+
+                <Text className="text-white text-base font-plexSemiBold">
+                  {locations}
+                </Text>
+              </View>
+              <View className="h-[1px] bg-neutral-700/60" />
+            </>
+          )}
+
+          {/* Team Size */}
+          <View className="flex-row items-center justify-between">
+            <Text className="text-neutral-400 text-sm font-plexMedium">
+              Team Size
+            </Text>
+
+            <Text className="text-white text-base font-plexSemiBold">
+              {teamSize}
+            </Text>
+          </View>
         </View>
-        {/* Content */}
-        <View className="gap-4 flex-1">
-          <Text className="text-white text-4xl font-plexBold leading-tight mt-4">
-            Finish setting up{"\n"}your workspace
+      </View>
+      <View className="flex-1 justify-center items-center">
+        <Text className="text-neutral-400 text-sm leading-7">
+          You can change and add more details in the settings later.
+        </Text>
+      </View>
+      <View className="self-end-safe">
+        <Pressable
+          onPress={() => router.push("/create-workspace")}
+          className="h-14 rounded-2xl items-center justify-center bg-blue-600"
+        >
+          <Text className="text-white text-base font-plexBold">
+            Create Workspace
           </Text>
-          <Text className="text-neutral-400 text-sm leading-7">
-            Invite staff, build a rota, and get your team ready.
-          </Text>
-        </View>
-        <View className="self-end-safe">
-          <Pressable
-            onPress={() => router.push("/create-workspace")}
-            className="h-14 rounded-2xl items-center justify-center bg-blue-600"
-          >
-            <Text className="text-white text-base font-plexBold">Continue</Text>
-          </Pressable>
-        </View>
+        </Pressable>
       </View>
     </View>
   );

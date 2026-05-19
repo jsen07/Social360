@@ -182,7 +182,7 @@ const signup = () => {
             className={`
     h-14
     rounded-2xl
-    bg-blue-400
+    bg-blue-500
     items-center
     justify-center
     mt-8

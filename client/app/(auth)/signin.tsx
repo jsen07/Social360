@@ -184,16 +184,14 @@ const signin = () => {
             style={signinAnimation.animatedStyle}
             onPress={handleLogin}
             className={`
-            h-14 rounded-2xl bg-blue-400 items-center justify-center mt-8 active:opacity-90
+            h-14 rounded-2xl bg-blue-500 items-center justify-center mt-8 active:opacity-90
             ${loading ? "opacity-70" : ""}`}
             disabled={loading}
           >
             {loading ? (
               <ActivityIndicator size="small" color="#0a0a0a" />
             ) : (
-              <Text className="text-neutral-950 text-base font-plexBold">
-                Login
-              </Text>
+              <Text className="text-white text-base font-plexBold">Login</Text>
             )}
           </AnimatedPressable>
         </View>

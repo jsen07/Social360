@@ -1,5 +1,5 @@
 import { Stack } from "expo-router";
-import useAuth from "../hooks/useAuth";
+import { AuthProvider, useAuth } from "../hooks/useAuth";
 import "../global.css";
 import { Amplify } from "aws-amplify";
 import outputs from "../amplify_outputs.json";
@@ -59,9 +59,11 @@ export default function Layout() {
   if (!fontsLoaded) return null;
   return (
     <ApolloProvider client={client}>
-      <Provider store={store}>
-        <RootNavigator />
-      </Provider>
+      <AuthProvider>
+        <Provider store={store}>
+          <RootNavigator />
+        </Provider>
+      </AuthProvider>
     </ApolloProvider>
   );
 
@@ -76,7 +78,6 @@ export default function Layout() {
     } = useAuth();
 
     if (loading) return null;
-    // console.log(isDBConnected);
     if (!loading && !isDBConnected && isLoggedIn)
       return <ServiceUnavailableScreen />;
 
@@ -88,14 +89,29 @@ export default function Layout() {
         }}
       >
         <Stack.Protected guard={isLoggedIn && !hasCompletedOnboarding}>
-          <Stack.Screen name="(onboarding)" />
+          <Stack.Screen
+            name="(onboarding)"
+            options={{
+              animation: "slide_from_right",
+            }}
+          />
         </Stack.Protected>
         <Stack.Protected guard={isLoggedIn && hasCompletedOnboarding}>
-          <Stack.Screen name="(app)" />
+          <Stack.Screen
+            name="(app)"
+            options={{
+              animation: "slide_from_right",
+            }}
+          />
         </Stack.Protected>
 
         <Stack.Protected guard={!isLoggedIn}>
-          <Stack.Screen name="(auth)" />
+          <Stack.Screen
+            name="(auth)"
+            options={{
+              animation: "fade_from_bottom",
+            }}
+          />
         </Stack.Protected>
       </Stack>
     );
