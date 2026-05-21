@@ -1,7 +1,13 @@
 import "dotenv/config";
 import crypto from "crypto";
 import { eq } from "drizzle-orm";
-import { users, invitations, companies, companyUsers } from "../db/schema.js";
+import {
+  users,
+  invitations,
+  companies,
+  companyUsers,
+  departments,
+} from "../db/schema.js";
 import { sendInviteEmail } from "../utils/email.js";
 
 export const resolvers = {
@@ -29,7 +35,7 @@ export const resolvers = {
           companyName: companies.name,
           hasCompletedOnboarding: companies.hasCompletedOnboarding,
 
-          role: companyUsers.role,
+          accountRole: companyUsers.accountRole,
         })
         .from(users)
         .leftJoin(companyUsers, eq(users.id, companyUsers.userId))
@@ -53,7 +59,7 @@ export const resolvers = {
                 id: result.companyId,
                 name: result.companyName,
                 hasCompletedOnboarding: result.hasCompletedOnboarding,
-                role: result.role,
+                accountRole: result.accountRole,
               },
             ]
           : [],
@@ -90,11 +96,11 @@ export const resolvers = {
       {
         email,
         companyId,
-        role,
+        accountRole,
       }: {
         email: string;
         companyId: string;
-        role: string;
+        accountRole: string;
       },
       { db }: any,
     ) => {
@@ -108,7 +114,7 @@ export const resolvers = {
         .values({
           email,
           companyId: Number(companyId),
-          role,
+          accountRole,
           token,
           expiresAt,
         })
@@ -153,7 +159,6 @@ export const resolvers = {
       },
       { db, authUser }: any,
     ) => {
-      console.log("Resolver authUser:", authUser?.sub);
       if (!authUser) {
         throw new Error("Unauthorized");
       }
@@ -182,10 +187,26 @@ export const resolvers = {
       await db.insert(companyUsers).values({
         userId: user.id,
         companyId: company.id,
-        role: companyRole,
+        accountRole: companyRole,
       });
 
       return company;
+    },
+    addDepartments: async (
+      _: unknown,
+      { companyId, names }: { companyId: string; names: string[] },
+      { db }: any,
+    ) => {
+      const addDepartments = names.map((name) => ({
+        companyId: Number(companyId),
+        name,
+      }));
+      const departmentsResult = await db
+        .insert(departments)
+        .values(addDepartments)
+        .returning();
+
+      return departmentsResult;
     },
   },
 };

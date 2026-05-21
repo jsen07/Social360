@@ -7,6 +7,7 @@ import {
   integer,
   unique,
   boolean,
+  numeric,
 } from "drizzle-orm/pg-core";
 
 export const users = pgTable("users", {
@@ -28,7 +29,6 @@ export const companies = pgTable("companies", {
   hasCompletedOnboarding: boolean("has_completed_onboarding")
     .notNull()
     .default(false),
-  // onboardingStep: integer("onboarding_step").notNull().default(0),
   createdAt: timestamp("created_at").defaultNow(),
 });
 
@@ -42,13 +42,26 @@ export const companyUsers = pgTable(
     companyId: integer("company_id")
       .notNull()
       .references(() => companies.id, { onDelete: "cascade" }),
-    role: text("role").notNull(),
+    accountRole: text("account_role").notNull(),
+    employmentStatus: text("employment_status").default("active"),
+    wageRate: numeric("wage_rate", { precision: 10, scale: 2 }),
+    wageType: text("wage_type").default("hourly"),
     createdAt: timestamp("created_at").defaultNow(),
   },
   (table) => ({
     uniqueUserCompany: unique().on(table.userId, table.companyId),
   }),
 );
+
+export const departments = pgTable("departments", {
+  id: serial("id").primaryKey(),
+  companyId: integer("company_id")
+    .notNull()
+    .references(() => companies.id, { onDelete: "cascade" }),
+
+  name: text("name").notNull(),
+  createdAt: timestamp("created_at").defaultNow(),
+});
 
 export const invitations = pgTable(
   "invitations",

@@ -1,0 +1,1 @@
+ALTER TABLE "company_users" RENAME COLUMN "role" TO "account_role";
